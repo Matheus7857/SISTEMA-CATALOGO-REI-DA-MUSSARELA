@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Catálogo ERP</string>
+    <string name="title_activity_main">Catálogo ERP</string>
+    <string name="package_name">com.reidamussarela.catalogo</string>
+    <string name="custom_url_scheme">com.reidamussarela.catalogo</string>
+</resources>

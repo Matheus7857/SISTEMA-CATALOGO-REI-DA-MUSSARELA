@@ -1,0 +1,28 @@
+{
+  "appId": "com.reidamussarela.catalogo",
+  "appName": "Catálogo ERP",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": false
+  },
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#f0f2f8",
+    "buildOptions": {
+      "releaseType": "APK"
+    }
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#c0001a",
+      "androidSplashResourceName": "splash",
+      "showSpinner": false
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon_config_sample",
+      "iconColor": "#c0001a"
+    }
+  }
+}

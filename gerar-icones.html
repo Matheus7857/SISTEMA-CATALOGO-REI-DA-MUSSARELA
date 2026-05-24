@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gerador de Ícones PWA - Catálogo ERP</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f0f2f8; padding: 40px; text-align: center; }
+    h1 { color: #c0001a; margin-bottom: 8px; }
+    p  { color: #555; margin-bottom: 32px; }
+    .previews { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-bottom: 32px; }
+    .preview-item { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+    .preview-item span { display: block; font-size: 12px; color: #888; margin-top: 8px; }
+    button {
+      background: #c0001a; color: #fff; border: none; border-radius: 8px;
+      padding: 14px 36px; font-size: 16px; font-weight: 700; cursor: pointer; letter-spacing: 1px;
+    }
+    button:hover { background: #a0001a; }
+    .status { margin-top: 20px; color: #22c55e; font-weight: 700; font-size: 14px; display: none; }
+  </style>
+</head>
+<body>
+  <h1>GERADOR DE ÍCONES PWA</h1>
+  <p>Clique no botão para gerar e baixar todos os ícones necessários para o APK / PWA.</p>
+
+  <div class="previews" id="previews"></div>
+
+  <button onclick="gerarETodos()">GERAR E BAIXAR TODOS OS ÍCONES</button>
+  <div class="status" id="status">✅ ÍCONES GERADOS! Mova os arquivos para a pasta <strong>icons/</strong> do projeto.</div>
+
+  <script>
+    const TAMANHOS = [72, 96, 128, 144, 152, 192, 384, 512];
+    const COR_BG   = "#c0001a";
+    const COR_TEXT = "#ffffff";
+
+    function gerarIcone(size) {
+      const canvas  = document.createElement("canvas");
+      canvas.width  = size;
+      canvas.height = size;
+      const ctx     = canvas.getContext("2d");
+
+      // Fundo vermelho arredondado
+      const r = size * 0.2;
+      ctx.beginPath();
+      ctx.moveTo(r, 0);
+      ctx.lineTo(size - r, 0);
+      ctx.quadraticCurveTo(size, 0, size, r);
+      ctx.lineTo(size, size - r);
+      ctx.quadraticCurveTo(size, size, size - r, size);
+      ctx.lineTo(r, size);
+      ctx.quadraticCurveTo(0, size, 0, size - r);
+      ctx.lineTo(0, r);
+      ctx.quadraticCurveTo(0, 0, r, 0);
+      ctx.closePath();
+      ctx.fillStyle = COR_BG;
+      ctx.fill();
+
+      // Ícone de caixa (produto)
+      ctx.fillStyle = COR_TEXT;
+
+      const cx = size / 2;
+      const cy = size / 2;
+      const u  = size / 10;
+
+      // Corpo da caixa
+      ctx.beginPath();
+      ctx.roundRect(cx - 3*u, cy - 1.5*u, 6*u, 4.5*u, u * 0.4);
+      ctx.fill();
+
+      // Tampa da caixa
+      ctx.beginPath();
+      ctx.roundRect(cx - 3.3*u, cy - 3*u, 6.6*u, 1.8*u, u * 0.4);
+      ctx.fill();
+
+      // Alça / fita
+      ctx.fillStyle = COR_BG;
+      ctx.beginPath();
+      ctx.roundRect(cx - 0.8*u, cy - 3.1*u, 1.6*u, 1.9*u, u * 0.2);
+      ctx.fill();
+
+      // Linha na caixa
+      ctx.fillStyle = "rgba(0,0,0,.15)";
+      ctx.fillRect(cx - 0.8*u, cy - 1.5*u, 1.6*u, 4.5*u);
+
+      return canvas;
+    }
+
+    // Mostrar preview
+    window.addEventListener("DOMContentLoaded", () => {
+      const container = document.getElementById("previews");
+      [72, 192, 512].forEach(size => {
+        const canvas = gerarIcone(size);
+        const item   = document.createElement("div");
+        item.className = "preview-item";
+        item.appendChild(canvas);
+        const label = document.createElement("span");
+        label.textContent = `${size}×${size}`;
+        item.appendChild(label);
+        container.appendChild(item);
+      });
+    });
+
+    function baixarCanvas(canvas, nome) {
+      return new Promise(resolve => {
+        canvas.toBlob(blob => {
+          const url = URL.createObjectURL(blob);
+          const a   = document.createElement("a");
+          a.href     = url;
+          a.download = nome;
+          a.click();
+          URL.revokeObjectURL(url);
+          setTimeout(resolve, 300);
+        }, "image/png");
+      });
+    }
+
+    async function gerarETodos() {
+      for (const size of TAMANHOS) {
+        const canvas = gerarIcone(size);
+        await baixarCanvas(canvas, `icon-${size}x${size}.png`);
+      }
+      document.getElementById("status").style.display = "block";
+    }
+  </script>
+</body>
+</html>
