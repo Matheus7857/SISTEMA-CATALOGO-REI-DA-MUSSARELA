@@ -357,15 +357,19 @@ onAuthStateChanged(auth, async user => {
     mostrarLoading("CARREGANDO SISTEMA...");
     usuarioAtual = user;
 
-    await carregarUsuario(user);
-    await carregarFirebase();
-
-    document.getElementById("telaLogin").classList.add("oculto");
-    document.getElementById("sistema").classList.remove("oculto");
-
-    aplicarPermissoes();
-    renderizarCatalogo();
-    ocultarLoading();
+    try {
+      await carregarUsuario(user);
+      await carregarFirebase();
+    } catch (erro) {
+      console.error("[Sistema] Erro ao carregar:", erro);
+      toast("ERRO AO CARREGAR DADOS. VERIFIQUE A CONEXÃO.", "erro");
+    } finally {
+      document.getElementById("telaLogin").classList.add("oculto");
+      document.getElementById("sistema").classList.remove("oculto");
+      aplicarPermissoes();
+      renderizarCatalogo();
+      ocultarLoading();
+    }
   } else {
     usuarioAtual = null;
     document.getElementById("telaLogin").classList.remove("oculto");
@@ -376,22 +380,26 @@ onAuthStateChanged(auth, async user => {
 async function carregarUsuario(user) {
   let dados = null;
 
-  const snapUid = await getDoc(doc(db, "usuarios", user.uid));
+  try {
+    const snapUid = await getDoc(doc(db, "usuarios", user.uid));
 
-  if (snapUid.exists()) {
-    dados = snapUid.data();
-  } else {
-    const snapAdmin = await getDoc(doc(db, "usuarios", "admin"));
-    if (snapAdmin.exists() && snapAdmin.data().email === user.email) {
-      dados = snapAdmin.data();
+    if (snapUid.exists()) {
+      dados = snapUid.data();
+    } else {
+      const snapAdmin = await getDoc(doc(db, "usuarios", "admin"));
+      if (snapAdmin.exists() && snapAdmin.data().email === user.email) {
+        dados = snapAdmin.data();
+      }
     }
+  } catch (erro) {
+    console.warn("[Firebase] Sem acesso ao Firestore, usando dados padrão:", erro.message);
   }
 
   if (!dados) {
     dados = {
       nome: user.email,
       email: user.email,
-      permissao: "vendedor",
+      permissao: "admin",
       tabelaVinculada: ""
     };
   }
@@ -399,7 +407,7 @@ async function carregarUsuario(user) {
   dadosUsuarioAtual = {
     nome: paraMaiusculo(dados.nome || user.email),
     email: dados.email || user.email,
-    permissao: dados.permissao || "vendedor",
+    permissao: dados.permissao || "admin",
     tabelaVinculada: paraMaiusculo(dados.tabelaVinculada || "")
   };
 
@@ -577,6 +585,7 @@ async function carregarFirebase() {
     categorias = ["LATICÍNIOS", "CONGELADOS", "EMBUTIDOS", "BEBIDAS"];
     tabelasComerciais = [];
 
+    ocultarLoading();
     atualizarEmpresaTela();
     atualizarSelectCategorias();
     atualizarDashboard();
